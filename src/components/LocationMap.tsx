@@ -1,105 +1,70 @@
 "use client";
 
-import { MapContainer, TileLayer, Circle, CircleMarker, Popup } from "react-leaflet";
-
-type Props = {
-employeeLat: number | null;
-employeeLng: number | null;
-jobSiteLat: number;
-jobSiteLng: number;
+type LocationMapProps = {
+employeeLat: number;
+employeeLng: number;
+jobLat: number;
+jobLng: number;
 radiusMeters: number;
-jobSiteName: string;
 };
 
 export default function LocationMap({
 employeeLat,
 employeeLng,
-jobSiteLat,
-jobSiteLng,
+jobLat,
+jobLng,
 radiusMeters,
-jobSiteName,
-}: Props) {
-const hasEmployeeLocation = employeeLat != null && employeeLng != null;
-
-const center: [number, number] = hasEmployeeLocation
-? [(employeeLat + jobSiteLat) / 2, (employeeLng + jobSiteLng) / 2]
-: [jobSiteLat, jobSiteLng];
+}: LocationMapProps) {
+const googleMapsUrl = `https://www.google.com/maps?q=${employeeLat},${employeeLng}`;
 
 return (
 <div
 style={{
 marginTop: 20,
-background: "white",
 border: "1px solid #e5e7eb",
 borderRadius: 12,
-padding: 12,
+padding: 16,
+background: "white",
 }}
 >
-<h3 style={{ marginTop: 0, marginBottom: 12 }}>Live GPS Verification</h3>
-<p style={{ color: "#6b7280", marginBottom: 20 }}>
-CareClock verifies employee location before allowing clock-in.
+<h3 style={{ marginTop: 0, marginBottom: 8 }}>Live GPS Verification</h3>
+
+<p style={{ marginTop: 0, opacity: 0.75, marginBottom: 14 }}>
+Employees must be physically within the job site radius to clock in.
 </p>
-<div style={{ height: 320, borderRadius: 12, overflow: "hidden" }}>
-<MapContainer
-center={center}
-zoom={17}
-scrollWheelZoom={false}
-style={{ height: "100%", width: "100%" }}
->
-<TileLayer
-attribution='&copy; OpenStreetMap contributors'
-url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-/>
 
-<Circle
-center={[jobSiteLat, jobSiteLng]}
-radius={radiusMeters}
-pathOptions={{
-color: "#2563eb",
-fillColor: "#93c5fd",
-fillOpacity: 0.2,
-}}
-/>
-
-<CircleMarker
-center={[jobSiteLat, jobSiteLng]}
-radius={8}
-pathOptions={{
-color: "#1d4ed8",
-fillColor: "#2563eb",
-fillOpacity: 1,
-}}
->
-<Popup>{jobSiteName}</Popup>
-</CircleMarker>
-
-{hasEmployeeLocation && (
-<CircleMarker
-center={[employeeLat!, employeeLng!]}
-radius={8}
-pathOptions={{
-color: "#15803d",
-fillColor: "#22c55e",
-fillOpacity: 1,
-}}
->
-<Popup>Employee Location</Popup>
-</CircleMarker>
-)}
-</MapContainer>
+<div style={{ display: "grid", gap: 10 }}>
+<div>
+<strong>Employee Location:</strong>{" "}
+{employeeLat.toFixed(6)}, {employeeLng.toFixed(6)}
 </div>
 
-<div
+<div>
+<strong>Job Site:</strong> {jobLat.toFixed(6)}, {jobLng.toFixed(6)}
+</div>
+
+<div>
+<strong>Allowed Radius:</strong> {radiusMeters} meters
+</div>
+</div>
+
+<div style={{ marginTop: 16 }}>
+<a
+href={googleMapsUrl}
+target="_blank"
+rel="noreferrer"
 style={{
-display: "flex",
-gap: 16,
-flexWrap: "wrap",
-marginTop: 12,
-fontSize: 14,
+display: "inline-block",
+padding: "10px 16px",
+background: "#2563eb",
+color: "white",
+borderRadius: 8,
+textDecoration: "none",
+fontWeight: 600,
 }}
 >
-<span>🔵 Job Site Radius</span>
-<span>🟢 Employee Location</span>
+Open Live Location in Maps
+</a>
 </div>
 </div>
 );

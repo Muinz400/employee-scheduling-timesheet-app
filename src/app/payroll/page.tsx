@@ -328,7 +328,8 @@ doc.save(`careclock-payroll-${selectedMonth}.pdf`);
 }
 
 if (loading) {
-return <main><p>Loading payroll...</p></main>;
+return <main>
+    <p>Loading payroll...</p></main>;
 }
 
 return (

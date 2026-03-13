@@ -298,14 +298,15 @@ disabled={loading || status !== "Clocked In"}
 </div>
 </div>
 
+{employeeLat !== null && employeeLng !== null && (
 <LocationMap
 employeeLat={employeeLat}
 employeeLng={employeeLng}
-jobSiteLat={JOB_SITE.latitude}
-jobSiteLng={JOB_SITE.longitude}
+jobLat={JOB_SITE.latitude}
+jobLng={JOB_SITE.longitude}
 radiusMeters={ALLOWED_RADIUS_METERS}
-jobSiteName={JOB_SITE.name}
 />
+)}
 
 <div style={logCardStyle}>
 <h3 style={{ marginTop: 0, marginBottom: 12 }}>Latest Time Activity</h3>
