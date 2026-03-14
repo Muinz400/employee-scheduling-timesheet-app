@@ -168,28 +168,40 @@ async function handleAddEmployee(e: React.FormEvent) {
     return;
     }
     
-    const { error } = await supabase.from("employees").insert([
-    {
-    org_id: adminOrgId,
+    const response = await fetch("/api/create-employee", {
+    method: "POST",
+    headers: {
+    "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
     name: newEmployeeName,
     email: newEmployeeEmail,
-    hourly_rate: hourlyRateNumber,
-    user_id: null,
-    },
-    ]);
+    hourlyRate: hourlyRateNumber,
+    orgId: adminOrgId,
+    }),
+    });
     
-    if (error) {
-    alert(error.message);
+    const result = await response.json();
+    
+    if (!response.ok) {
+    alert(result.error || "Failed to create employee.");
     return;
     }
     
     setNewEmployeeName("");
     setNewEmployeeEmail("");
     setNewEmployeeRate("");
-    alert("Employee added successfully.");
+    
+    alert(
+    `Employee created successfully. Temporary password: ${result.temporaryPassword}`
+    );
     
     loadDashboard();
     }
+    
+    
+    
+    
 
 
 return (
