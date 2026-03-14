@@ -13,7 +13,6 @@ const [loading, setLoading] = useState(false);
 
 const handleLogin = async (e: React.FormEvent) => {
 e.preventDefault();
-
 setLoading(true);
 
 const { error } = await supabase.auth.signInWithPassword({
@@ -27,7 +26,34 @@ setLoading(false);
 return;
 }
 
+const {
+data: { user },
+error: userError,
+} = await supabase.auth.getUser();
+
+if (userError || !user) {
+alert("Login succeeded but user could not be loaded.");
+setLoading(false);
+return;
+}
+
+const { data: profile, error: profileError } = await supabase
+.from("profiles")
+.select("role")
+.eq("id", user.id)
+.single();
+
+if (profileError || !profile) {
+alert("Profile not found.");
+setLoading(false);
+return;
+}
+
+if (profile.role === "admin") {
+router.push("/admin");
+} else {
 router.push("/employee/clock");
+}
 };
 
 return (
@@ -41,7 +67,7 @@ borderRadius: 10,
 background: "#fff",
 }}
 >
-<h1>Employee Login</h1>
+<h1>Login</h1>
 
 <form
 onSubmit={handleLogin}
