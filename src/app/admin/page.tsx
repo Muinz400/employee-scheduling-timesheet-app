@@ -46,26 +46,36 @@ const router = useRouter();
 
 useEffect(() => {
 async function checkAdmin() {
-const { data: { user } } = await supabase.auth.getUser();
+const {
+data: { user },
+error: userError,
+} = await supabase.auth.getUser();
 
-if (!user) {
+if (userError || !user) {
 router.push("/login");
 return;
 }
 
-const { data: employee } = await supabase
-.from("employees")
+const { data: profile, error: profileError } = await supabase
+.from("profiles")
 .select("role")
-.eq("user_id", user.id)
+.eq("id", user.id)
 .single();
 
-if (!employee || employee.role !== "admin") {
+if (profileError || !profile) {
+router.push("/login");
+return;
+}
+
+if (profile.role !== "admin") {
 router.push("/employee/clock");
+return;
 }
 }
 
 checkAdmin();
-}, []);
+}, [router]);
+
 
 
 
