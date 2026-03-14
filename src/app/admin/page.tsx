@@ -144,31 +144,110 @@ return (
 <p style={{ marginTop: 0, opacity: 0.75 }}>
 Live employee clock activity and latest timesheet status.
 </p>
-<div style={{ display: "flex", gap: 12, marginBottom: 24, flexWrap: "wrap" }}>
-{[
-["Employees", "/employees"],
-["Timesheets", "/timesheets"],
-["Payroll", "/payroll"],
-["Scheduling", "/scheduling"],
-["Clients", "/clients"],
-["Houses", "/houses"],
-].map(([label, href]) => (
-<a key={href} href={href}>
+<div style={{ display: "flex", gap: 16, marginBottom: 24, flexWrap: "wrap" }}>
+<a href="/employees">
 <button
 style={{
-padding: "8px 14px",
-borderRadius: 6,
-border: "1px solid #ddd",
-background: "#f9f9f9",
+padding: "12px 20px",
+background: "#111",
+color: "white",
+border: "none",
+borderRadius: 8,
+fontWeight: 600,
 cursor: "pointer",
-fontWeight: 500,
+fontSize: 14
 }}
 >
-{label}
+Employees
 </button>
 </a>
-))}
+
+<a href="/timesheets">
+<button
+style={{
+padding: "12px 20px",
+background: "#111",
+color: "white",
+border: "none",
+borderRadius: 8,
+fontWeight: 600,
+cursor: "pointer",
+fontSize: 14
+}}
+>
+Timesheets
+</button>
+</a>
+
+<a href="/payroll">
+<button
+style={{
+padding: "12px 20px",
+background: "#111",
+color: "white",
+border: "none",
+borderRadius: 8,
+fontWeight: 600,
+cursor: "pointer",
+fontSize: 14
+}}
+>
+Payroll
+</button>
+</a>
+
+<a href="/scheduling">
+<button
+style={{
+padding: "12px 20px",
+background: "#111",
+color: "white",
+border: "none",
+borderRadius: 8,
+fontWeight: 600,
+cursor: "pointer",
+fontSize: 14
+}}
+>
+Scheduling
+</button>
+</a>
+
+<a href="/clients">
+<button
+style={{
+padding: "12px 20px",
+background: "#111",
+color: "white",
+border: "none",
+borderRadius: 8,
+fontWeight: 600,
+cursor: "pointer",
+fontSize: 14
+}}
+>
+Clients
+</button>
+</a>
+
+<a href="/houses">
+<button
+style={{
+padding: "12px 20px",
+background: "#111",
+color: "white",
+border: "none",
+borderRadius: 8,
+fontWeight: 600,
+cursor: "pointer",
+fontSize: 14
+}}
+>
+Houses
+</button>
+</a>
 </div>
+
 
 
 <div style={{ margin: "20px 0" }}>
