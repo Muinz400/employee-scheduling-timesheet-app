@@ -1,5 +1,5 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
 
@@ -41,6 +41,33 @@ export default function AdminPage() {
 const [rows, setRows] = useState<EmployeeDashboardRow[]>([]);
 const [loading, setLoading] = useState(true);
 const [error, setError] = useState("");
+
+const router = useRouter();
+
+useEffect(() => {
+async function checkAdmin() {
+const { data: { user } } = await supabase.auth.getUser();
+
+if (!user) {
+router.push("/login");
+return;
+}
+
+const { data: employee } = await supabase
+.from("employees")
+.select("role")
+.eq("user_id", user.id)
+.single();
+
+if (!employee || employee.role !== "admin") {
+router.push("/employee/clock");
+}
+}
+
+checkAdmin();
+}, []);
+
+
 
 async function loadDashboard() {
 setLoading(true);
