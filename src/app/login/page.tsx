@@ -41,19 +41,9 @@ const { data: profile, error: profileError } = await supabase
 .from("profiles")
 .select("id, role, full_name")
 .eq("id", user.id)
-.maybeSingle();
+.single();
 
-console.log("AUTH USER:", user);
-console.log("PROFILE RESULT:", profile);
-console.log("PROFILE ERROR:", profileError);
-
-if (profileError) {
-alert(`Profile query error: ${profileError.message}`);
-setLoading(false);
-return;
-}
-
-if (!profile) {
+if (profileError || !profile) {
 alert("Profile not found.");
 setLoading(false);
 return;
@@ -69,9 +59,9 @@ router.push("/employee/clock");
 return (
 <main
 style={{
-maxWidth: 400,
+maxWidth: 420,
 margin: "100px auto",
-padding: 30,
+padding: 32,
 border: "1px solid #e5e7eb",
 borderRadius: 12,
 background: "white",
@@ -89,7 +79,11 @@ placeholder="Email"
 value={email}
 onChange={(e) => setEmail(e.target.value)}
 required
-style={{ padding: 12, border: "1px solid #d1d5db", borderRadius: 8 }}
+style={{
+padding: 12,
+border: "1px solid #d1d5db",
+borderRadius: 8,
+}}
 />
 
 <input
@@ -98,7 +92,11 @@ placeholder="Password"
 value={password}
 onChange={(e) => setPassword(e.target.value)}
 required
-style={{ padding: 12, border: "1px solid #d1d5db", borderRadius: 8 }}
+style={{
+padding: 12,
+border: "1px solid #d1d5db",
+borderRadius: 8,
+}}
 />
 
 <button
@@ -106,7 +104,7 @@ type="submit"
 disabled={loading}
 style={{
 padding: 12,
-background: "#16a34a",
+background: "#166534",
 color: "white",
 border: "none",
 borderRadius: 8,
@@ -120,5 +118,3 @@ cursor: "pointer",
 </main>
 );
 }
-
-
