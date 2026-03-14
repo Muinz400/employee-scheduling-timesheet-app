@@ -8,15 +8,29 @@ const LocationMap = dynamic(() => import("../../../components/LocationMap"), {
 ssr: false,
 });
 
-const TEST_EMPLOYEE_ID = "11111111-1111-1111-1111-111111111111";
-
 const JOB_SITE = {
-name: "Client Home - Marysville",
+name: "Client Home — Marysville",
 latitude: 48.03957,
 longitude: -122.14665,
 };
 
 const ALLOWED_RADIUS_METERS = 200;
+
+type EmployeeRow = {
+id: string;
+user_id: string | null;
+name: string;
+email: string;
+};
+
+type ClockLogRow = {
+id: string;
+employee_id: string;
+latitude: number | null;
+longitude: number | null;
+clock_in: string | null;
+clock_out: string | null;
+};
 
 export default function ClockPage() {
 const [status, setStatus] = useState<string>("Not clocked in");
@@ -27,6 +41,9 @@ const [employeeLng, setEmployeeLng] = useState<number | null>(null);
 const [lastClockIn, setLastClockIn] = useState<string | null>(null);
 const [lastClockOut, setLastClockOut] = useState<string | null>(null);
 const [loading, setLoading] = useState(false);
+
+const [employee, setEmployee] = useState<EmployeeRow | null>(null);
+const [authReady, setAuthReady] = useState(false);
 
 function getDistanceMeters(
 lat1: number,
@@ -63,11 +80,38 @@ minute: "2-digit",
 });
 }
 
-async function loadLatestClockLog() {
+async function loadEmployeeAndClockLog() {
+const {
+data: { user },
+error: userError,
+} = await supabase.auth.getUser();
+
+if (userError || !user) {
+alert("Please log in first.");
+setAuthReady(true);
+return;
+}
+
+const { data: employeeRow, error: employeeError } = await supabase
+.from("employees")
+.select("id, user_id, name, email")
+.eq("user_id", user.id)
+.single();
+
+if (employeeError || !employeeRow) {
+console.error(employeeError);
+alert("Employee record not found.");
+setAuthReady(true);
+return;
+}
+
+setEmployee(employeeRow);
+setAuthReady(true);
+
 const { data, error } = await supabase
 .from("clock_logs")
-.select("clock_in, clock_out")
-.eq("employee_id", TEST_EMPLOYEE_ID)
+.select("id, employee_id, clock_in, clock_out, latitude, longitude")
+.eq("employee_id", employeeRow.id)
 .order("clock_in", { ascending: false })
 .limit(1)
 .single();
@@ -76,6 +120,8 @@ if (!error && data) {
 setLastClockIn(data.clock_in ?? null);
 setLastClockOut(data.clock_out ?? null);
 setStatus(data.clock_in && !data.clock_out ? "Clocked In" : "Clocked Out");
+} else {
+setStatus("Not clocked in");
 }
 }
 
@@ -112,10 +158,15 @@ console.error(err);
 
 useEffect(() => {
 checkCurrentLocation();
-loadLatestClockLog();
+void loadEmployeeAndClockLog();
 }, []);
 
 const handleClockIn = async () => {
+if (!employee) {
+alert("Employee not loaded yet.");
+return;
+}
+
 if (!navigator.geolocation) {
 alert("Geolocation not supported");
 return;
@@ -145,7 +196,7 @@ const nowIso = new Date().toISOString();
 
 const { error } = await supabase.from("clock_logs").insert([
 {
-employee_id: TEST_EMPLOYEE_ID,
+employee_id: employee.id,
 latitude: lat,
 longitude: lng,
 clock_in: nowIso,
@@ -177,13 +228,18 @@ setLoading(false);
 };
 
 const handleClockOut = async () => {
+if (!employee) {
+alert("Employee not loaded yet.");
+return;
+}
+
 setLoading(true);
 
 try {
 const { data: latestLog, error: fetchError } = await supabase
 .from("clock_logs")
 .select("*")
-.eq("employee_id", TEST_EMPLOYEE_ID)
+.eq("employee_id", employee.id)
 .is("clock_out", null)
 .order("clock_in", { ascending: false })
 .limit(1)
@@ -221,10 +277,57 @@ setLoading(false);
 const isWithinRadius =
 distanceAway !== null && Number(distanceAway) <= ALLOWED_RADIUS_METERS;
 
+const cardStyle: React.CSSProperties = {
+background: "#fff",
+border: "1px solid #e5e7eb",
+borderRadius: 12,
+padding: 18,
+maxWidth: 720,
+boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+};
+
+const clockInBtn: React.CSSProperties = {
+padding: "10px 16px",
+borderRadius: 8,
+border: "none",
+background: "#16a34a",
+color: "white",
+fontWeight: 600,
+cursor: "pointer",
+};
+
+const clockOutBtn: React.CSSProperties = {
+padding: "10px 16px",
+borderRadius: 8,
+border: "none",
+background: "#dc2626",
+color: "white",
+fontWeight: 600,
+cursor: "pointer",
+};
+
+const logCardStyle: React.CSSProperties = {
+...cardStyle,
+marginTop: 16,
+};
+
+if (!authReady) {
 return (
-<main>
+<main style={{ padding: 24 }}>
+<p>Loading employee session...</p>
+</main>
+);
+}
+
+return (
+<main style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
 <h1>CareClock Employee Time</h1>
 
+{employee ? (
+<p style={{ opacity: 0.75, marginTop: 4 }}>
+Logged in as <strong>{employee.name}</strong> ({employee.email})
+</p>
+) : null}
 
 <div style={cardStyle}>
 <p>
@@ -299,6 +402,7 @@ disabled={loading || status !== "Clocked In"}
 </div>
 
 {employeeLat !== null && employeeLng !== null && (
+<div style={{ marginTop: 20 }}>
 <LocationMap
 employeeLat={employeeLat}
 employeeLng={employeeLng}
@@ -306,6 +410,7 @@ jobLat={JOB_SITE.latitude}
 jobLng={JOB_SITE.longitude}
 radiusMeters={ALLOWED_RADIUS_METERS}
 />
+</div>
 )}
 
 <div style={logCardStyle}>
@@ -320,38 +425,3 @@ radiusMeters={ALLOWED_RADIUS_METERS}
 </main>
 );
 }
-
-const cardStyle: React.CSSProperties = {
-background: "white",
-border: "1px solid #e5e7eb",
-borderRadius: 12,
-padding: 20,
-maxWidth: 460,
-};
-
-const logCardStyle: React.CSSProperties = {
-marginTop: 20,
-background: "white",
-border: "1px solid #e5e7eb",
-borderRadius: 12,
-padding: 16,
-maxWidth: 460,
-};
-
-const clockInBtn: React.CSSProperties = {
-background: "#16a34a",
-color: "white",
-border: "none",
-padding: "10px 16px",
-borderRadius: 8,
-cursor: "pointer",
-};
-
-const clockOutBtn: React.CSSProperties = {
-background: "#dc2626",
-color: "white",
-border: "none",
-padding: "10px 16px",
-borderRadius: 8,
-cursor: "pointer",
-};
