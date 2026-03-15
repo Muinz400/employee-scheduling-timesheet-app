@@ -144,10 +144,17 @@ setLoading(false);
 }
 
 useEffect(() => {
-    loadDashboard();
+    let isMounted = true;
+    
+    async function refreshDashboard() {
+    if (!isMounted) return;
+    await loadDashboard();
+    }
+    
+    refreshDashboard();
     
     const channel = supabase
-    .channel("admin-live-clock")
+    .channel("admin-clock-live")
     .on(
     "postgres_changes",
     {
@@ -155,19 +162,21 @@ useEffect(() => {
     schema: "public",
     table: "clock_logs",
     },
-    () => {
-    console.log("Clock log changed — refreshing dashboard");
-    loadDashboard();
+    async (payload) => {
+    console.log("Realtime payload received:", payload);
+    await refreshDashboard();
     }
     )
-    .subscribe();
+    .subscribe((status) => {
+    console.log("Realtime status:", status);
+    });
     
     return () => {
+    isMounted = false;
     supabase.removeChannel(channel);
     };
     }, []);
     
-
 
 async function handleAddEmployee(e: React.FormEvent) {
     e.preventDefault();
