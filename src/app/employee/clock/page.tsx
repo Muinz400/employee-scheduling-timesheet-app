@@ -358,6 +358,15 @@ Logged in as <strong>{employee.name}</strong> ({employee.email})
 </p>
 ) : null}
 
+<button
+onClick={async () => {
+await supabase.auth.signOut();
+router.push("/login");
+}}
+>
+Sign Out
+</button>
+
 <div style={cardStyle}>
 <p>
 <strong>Status:</strong>{" "}
