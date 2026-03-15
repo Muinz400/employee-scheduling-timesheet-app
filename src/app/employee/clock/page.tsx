@@ -249,51 +249,59 @@ setLoading(false);
 };
 
 const handleClockOut = async () => {
-if (!employee) {
-alert("Employee not loaded yet.");
-return;
-}
-
-setLoading(true);
-
-try {
-const { data: latestLog, error: fetchError } = await supabase
-.from("clock_logs")
-.select("*")
-.eq("employee_id", employee.id)
-.is("clock_out", null)
-.order("clock_in", { ascending: false })
-.limit(1)
-.single();
-
-if (fetchError || !latestLog) {
-alert("No active clock-in found");
-setLoading(false);
-return;
-}
-
-const nowIso = new Date().toISOString();
-
-const { error: updateError } = await supabase
-.from("clock_logs")
-.update({ clock_out: nowIso })
-.eq("id", latestLog.id);
-
-if (updateError) {
-alert(updateError.message);
-setLoading(false);
-return;
-}
-
-setStatus("Clocked Out");
-setLastClockOut(nowIso);
-} catch (err) {
-console.error(err);
-alert("Failed to clock out");
-} finally {
-setLoading(false);
-}
-};
+    if (!employee) {
+    alert("Employee not loaded yet.");
+    return;
+    }
+    
+    setLoading(true);
+    
+    try {
+    const { data: openShift, error: openShiftError } = await supabase
+    .from("clock_logs")
+    .select("id, clock_in, clock_out")
+    .eq("employee_id", employee.id)
+    .is("clock_out", null)
+    .order("clock_in", { ascending: false })
+    .maybeSingle();
+    
+    if (openShiftError) {
+    alert(openShiftError.message);
+    setLoading(false);
+    return;
+    }
+    
+    if (!openShift) {
+    alert("You are not currently clocked in.");
+    setStatus("Clocked Out");
+    setLoading(false);
+    return;
+    }
+    
+    const nowIso = new Date().toISOString();
+    
+    const { error: updateError } = await supabase
+    .from("clock_logs")
+    .update({ clock_out: nowIso })
+    .eq("id", openShift.id);
+    
+    if (updateError) {
+    alert(updateError.message);
+    setLoading(false);
+    return;
+    }
+    
+    setStatus("Clocked Out");
+    setLastClockOut(nowIso);
+    await loadEmployeeAndClockLog();
+    } catch (err) {
+    console.error(err);
+    alert("Failed to clock out.");
+    } finally {
+    setLoading(false);
+    }
+    };
+    
 
 const isWithinRadius =
 distanceAway !== null && Number(distanceAway) <= ALLOWED_RADIUS_METERS;
