@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../../supabaseClient";
+import { supabase } from "../../../../supabaseClient";
+
+type ProfileRow = {
+id: string;
+org_id: string;
+role: string;
+};
 
 type EmployeeRow = {
 id: string;
@@ -23,17 +29,22 @@ longitude: number | null;
 created_at: string | null;
 };
 
-export default function EmployeeTimesheetsPage() {
+export default function TimesheetsPage() {
 const router = useRouter();
 
 const [authReady, setAuthReady] = useState(false);
-const [employee, setEmployee] = useState<EmployeeRow | null>(null);
+const [adminOrgId, setAdminOrgId] = useState<string | null>(null);
+
+const [employees, setEmployees] = useState<EmployeeRow[]>([]);
+const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+
 const [logs, setLogs] = useState<ClockLogRow[]>([]);
-const [loading, setLoading] = useState(true);
+const [loadingEmployees, setLoadingEmployees] = useState(true);
+const [loadingLogs, setLoadingLogs] = useState(false);
 const [error, setError] = useState<string | null>(null);
 
-async function loadEmployeeTimesheets() {
-setLoading(true);
+async function checkAdminAndLoadEmployees() {
+setLoadingEmployees(true);
 setError(null);
 
 const {
@@ -48,7 +59,7 @@ return;
 
 const { data: profile, error: profileError } = await supabase
 .from("profiles")
-.select("id, role")
+.select("id, org_id, role")
 .eq("id", user.id)
 .single();
 
@@ -57,47 +68,74 @@ router.push("/login");
 return;
 }
 
-if (profile.role !== "employee") {
-router.push("/admin");
+const adminProfile = profile as ProfileRow;
+
+if (adminProfile.role !== "admin") {
+router.push("/employee/clock");
 return;
 }
 
-const { data: employeeRow, error: employeeError } = await supabase
+setAdminOrgId(adminProfile.org_id);
+setAuthReady(true);
+
+const { data: employeeRows, error: employeesError } = await supabase
 .from("employees")
 .select("id, user_id, org_id, name, email, hourly_rate")
-.eq("user_id", user.id)
-.single();
+.eq("org_id", adminProfile.org_id)
+.order("name", { ascending: true });
 
-if (employeeError || !employeeRow) {
-setError("Employee record not found.");
-setLoading(false);
-setAuthReady(true);
+if (employeesError) {
+setError(employeesError.message);
+setLoadingEmployees(false);
 return;
 }
 
-setEmployee(employeeRow as EmployeeRow);
+const employeeList = (employeeRows ?? []) as EmployeeRow[];
+setEmployees(employeeList);
 
-const { data: logRows, error: logsError } = await supabase
+if (employeeList.length > 0) {
+setSelectedEmployeeId(employeeList[0].id);
+}
+
+setLoadingEmployees(false);
+}
+
+async function loadLogs(employeeId: string) {
+if (!employeeId) {
+setLogs([]);
+return;
+}
+
+setLoadingLogs(true);
+setError(null);
+
+const { data, error } = await supabase
 .from("clock_logs")
 .select("id, employee_id, clock_in, clock_out, latitude, longitude, created_at")
-.eq("employee_id", employeeRow.id)
+.eq("employee_id", employeeId)
 .order("clock_in", { ascending: false });
 
-if (logsError) {
-setError(logsError.message);
-setLoading(false);
-setAuthReady(true);
+if (error) {
+setError(error.message);
+setLoadingLogs(false);
 return;
 }
 
-setLogs((logRows ?? []) as ClockLogRow[]);
-setLoading(false);
-setAuthReady(true);
+setLogs((data ?? []) as ClockLogRow[]);
+setLoadingLogs(false);
 }
 
 useEffect(() => {
-void loadEmployeeTimesheets();
+void checkAdminAndLoadEmployees();
 }, []);
+
+useEffect(() => {
+if (selectedEmployeeId) {
+void loadLogs(selectedEmployeeId);
+}
+}, [selectedEmployeeId]);
+
+const selectedEmployee = employees.find((emp) => emp.id === selectedEmployeeId) ?? null;
 
 const totalHours = useMemo(() => {
 return logs.reduce((sum, log) => {
@@ -137,12 +175,7 @@ const hours = (end - start) / (1000 * 60 * 60);
 return hours.toFixed(2);
 }
 
-async function handleSignOut() {
-await supabase.auth.signOut();
-router.push("/login");
-}
-
-if (!authReady && loading) {
+if (!authReady && loadingEmployees) {
 return (
 <main style={{ maxWidth: 1100, margin: "40px auto", padding: 20 }}>
 <p>Loading timesheets...</p>
@@ -152,49 +185,42 @@ return (
 
 return (
 <main style={{ maxWidth: 1100, margin: "40px auto", padding: 20 }}>
-<div
-style={{
-display: "flex",
-justifyContent: "space-between",
-alignItems: "center",
-marginBottom: 8,
-gap: 12,
-flexWrap: "wrap",
-}}
->
-<h1 style={{ margin: 0 }}>My Timesheets</h1>
-
-<button
-onClick={handleSignOut}
-style={{
-padding: "8px 14px",
-background: "#111",
-color: "white",
-border: "none",
-borderRadius: 8,
-fontWeight: 600,
-cursor: "pointer",
-fontSize: 13,
-}}
->
-Sign Out
-</button>
-</div>
-
+<h1 style={{ marginBottom: 8 }}>Timesheets</h1>
 <p style={{ opacity: 0.75, marginBottom: 20 }}>
-Review your worked hours from clock logs.
+Review employee shifts and worked hours.
 </p>
 
-{employee && (
+<div style={controlsWrap}>
+<div>
+<label style={labelStyle}>Employee</label>
+<select
+value={selectedEmployeeId}
+onChange={(e) => setSelectedEmployeeId(e.target.value)}
+style={selectStyle}
+>
+{employees.length === 0 ? (
+<option value="">No employees found</option>
+) : (
+employees.map((employee) => (
+<option key={employee.id} value={employee.id}>
+{employee.name}
+</option>
+))
+)}
+</select>
+</div>
+</div>
+
+{selectedEmployee && (
 <div style={summaryRow}>
 <div style={summaryCard}>
 <div style={summaryLabel}>Employee</div>
-<div style={summaryValueSmall}>{employee.name}</div>
+<div style={summaryValueSmall}>{selectedEmployee.name}</div>
 </div>
 
 <div style={summaryCard}>
 <div style={summaryLabel}>Email</div>
-<div style={summaryValueSmall}>{employee.email}</div>
+<div style={summaryValueSmall}>{selectedEmployee.email}</div>
 </div>
 
 <div style={summaryCard}>
@@ -210,8 +236,8 @@ Error: {error}
 </p>
 )}
 
-{loading ? (
-<p style={{ marginTop: 16 }}>Loading...</p>
+{loadingLogs ? (
+<p style={{ marginTop: 16 }}>Loading logs...</p>
 ) : logs.length === 0 ? (
 <p style={{ marginTop: 16 }}>No time records found yet.</p>
 ) : (
@@ -257,6 +283,28 @@ return (
 </main>
 );
 }
+
+const controlsWrap: React.CSSProperties = {
+display: "flex",
+gap: 16,
+marginBottom: 20,
+flexWrap: "wrap",
+};
+
+const labelStyle: React.CSSProperties = {
+display: "block",
+fontSize: 13,
+fontWeight: 600,
+marginBottom: 8,
+};
+
+const selectStyle: React.CSSProperties = {
+padding: "10px 12px",
+border: "1px solid #d1d5db",
+borderRadius: 8,
+minWidth: 240,
+background: "white",
+};
 
 const summaryRow: React.CSSProperties = {
 display: "flex",
