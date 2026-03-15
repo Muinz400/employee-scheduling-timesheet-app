@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../../supabaseClient";
+import React from "react";
 
 type ProfileRow = {
 id: string;
@@ -150,6 +151,23 @@ return sum + (end - start) / (1000 * 60 * 60);
 }, 0);
 }, [logs]);
 
+
+const groupedLogs = useMemo(() => {
+    const groups: Record<string, ClockLogRow[]> = {};
+    
+    for (const log of logs) {
+    const key = getDateLabel(log.clock_in);
+    
+    if (!groups[key]) {
+    groups[key] = [];
+    }
+    
+    groups[key].push(log);
+    }
+    
+    return Object.entries(groups);
+    }, [logs]);
+
 function formatDateTime(value: string | null) {
 if (!value) return "—";
 
@@ -161,6 +179,40 @@ hour: "numeric",
 minute: "2-digit",
 });
 }
+
+function getHoursNumber(clockIn: string | null, clockOut: string | null) {
+    if (!clockIn || !clockOut) return null;
+    
+    const start = new Date(clockIn).getTime();
+    const end = new Date(clockOut).getTime();
+    
+    if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return null;
+    
+    return (end - start) / (1000 * 60 * 60);
+    }
+    
+    function formatHoursDetailed(clockIn: string | null, clockOut: string | null) {
+    if (!clockIn) return "—";
+    if (!clockOut) return "Active";
+    
+    const hours = getHoursNumber(clockIn, clockOut);
+    if (hours == null) return "—";
+    
+    const totalMinutes = Math.round(hours * 60);
+    
+    return `${hours.toFixed(2)} hrs (${totalMinutes} min)`;
+    }
+    
+    function getDateLabel(value: string | null) {
+    if (!value) return "Unknown Date";
+    
+    return new Date(value).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    });
+    }
 
 function formatHours(clockIn: string | null, clockOut: string | null) {
 if (!clockIn) return "—";
@@ -182,6 +234,8 @@ return (
 </main>
 );
 }
+
+
 
 return (
 <main style={{ maxWidth: 1100, margin: "40px auto", padding: 20 }}>
@@ -225,7 +279,10 @@ employees.map((employee) => (
 
 <div style={summaryCard}>
 <div style={summaryLabel}>Total Logged Hours</div>
-<div style={summaryValue}>{totalHours.toFixed(2)}</div>
+<div style={summaryValue}>{totalHours.toFixed(2)} hrs</div>
+</div>
+<div style={{ fontSize: 13, opacity: 0.7 }}>
+{Math.round(totalHours * 60)} total minutes
 </div>
 </div>
 )}
@@ -253,30 +310,49 @@ Error: {error}
 </tr>
 </thead>
 <tbody>
-{logs.map((log) => {
-const dateLabel = log.clock_in
+{groupedLogs.map(([groupLabel, dayLogs]) => (
+<React.Fragment key={groupLabel}>
+<tr>
+<td
+colSpan={5}
+style={{
+padding: "12px 14px",
+background: "#f8fafc",
+fontWeight: 700,
+borderBottom: "1px solid #e5e7eb",
+}}
+>
+{groupLabel}
+</td>
+</tr>
+
+{dayLogs.map((log) => (
+<tr key={log.id}>
+<td style={tdStyle}>
+{log.clock_in
 ? new Date(log.clock_in).toLocaleDateString("en-US", {
 month: "short",
 day: "numeric",
 year: "numeric",
 })
-: "—";
-
-return (
-<tr key={log.id}>
-<td style={tdStyle}>{dateLabel}</td>
+: "—"}
+</td>
 <td style={tdStyle}>{formatDateTime(log.clock_in)}</td>
 <td style={tdStyle}>{formatDateTime(log.clock_out)}</td>
-<td style={tdStyle}>{formatHours(log.clock_in, log.clock_out)}</td>
+<td style={tdStyle}>
+{formatHoursDetailed(log.clock_in, log.clock_out)}
+</td>
 <td style={tdStyle}>
 {log.latitude != null && log.longitude != null
 ? `${Number(log.latitude).toFixed(5)}, ${Number(log.longitude).toFixed(5)}`
 : "—"}
 </td>
 </tr>
-);
-})}
+))}
+</React.Fragment>
+))}
 </tbody>
+
 </table>
 </div>
 )}
