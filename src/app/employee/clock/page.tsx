@@ -157,11 +157,15 @@ checkCurrentLocation();
 void loadEmployeeAndClockLog();
 }, []);
 
+
+
 const handleClockIn = async () => {
 if (!employee) {
 alert("Employee not loaded yet.");
 return;
 }
+
+
 
 if (!navigator.geolocation) {
 alert("Geolocation not supported");
@@ -169,6 +173,27 @@ return;
 }
 
 setLoading(true);
+
+const { data: existingOpenShift, error: existingShiftError } = await supabase
+.from("clock_logs")
+.select("id")
+.eq("employee_id", employee.id)
+.is("clock_out", null)
+.maybeSingle();
+
+if (existingShiftError) {
+alert(existingShiftError.message);
+setLoading(false);
+return;
+}
+
+if (existingOpenShift) {
+alert("You are already clocked in.");
+setLoading(false);
+return;
+}
+
+
 
 navigator.geolocation.getCurrentPosition(
 async (pos) => {
