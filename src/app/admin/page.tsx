@@ -144,14 +144,18 @@ setLoading(false);
 }
 
 useEffect(() => {
-    let isMounted = true;
+    let mounted = true;
     
-    async function refreshDashboard() {
-    if (!isMounted) return;
+    const refresh = async () => {
+    if (!mounted) return;
     await loadDashboard();
-    }
+    };
     
-    refreshDashboard();
+    refresh();
+    
+    const interval = setInterval(() => {
+    refresh();
+    }, 3000);
     
     const channel = supabase
     .channel("admin-clock-live")
@@ -162,17 +166,15 @@ useEffect(() => {
     schema: "public",
     table: "clock_logs",
     },
-    async (payload) => {
-    console.log("Realtime payload received:", payload);
-    await refreshDashboard();
+    async () => {
+    await refresh();
     }
     )
-    .subscribe((status) => {
-    console.log("Realtime status:", status);
-    });
+    .subscribe();
     
     return () => {
-    isMounted = false;
+    mounted = false;
+    clearInterval(interval);
     supabase.removeChannel(channel);
     };
     }, []);
