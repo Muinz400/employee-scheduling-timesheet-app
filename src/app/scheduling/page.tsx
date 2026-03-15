@@ -21,8 +21,8 @@ type Schedule = {
 id: string;
 employee_id: string;
 org_id?: string;
+houseName: string | null;
 work_date: string;
-house_name: string | null;
 start_time: string | null;
 end_time: string | null;
 mileage: number | null;
@@ -40,8 +40,8 @@ const [employees, setEmployees] = useState<Employee[]>([]);
 const [schedules, setSchedules] = useState<Schedule[]>([]);
 
 const [employeeId, setEmployeeId] = useState("");
-const [workDate, setWorkDate] = useState("");
 const [houseName, setHouseName] = useState("");
+const [workDate, setWorkDate] = useState("");
 const [startTime, setStartTime] = useState("");
 const [endTime, setEndTime] = useState("");
 const [mileage, setMileage] = useState("");
@@ -134,8 +134,8 @@ setSchedules((data ?? []) as Schedule[]);
 function editShift(s: Schedule) {
 setEditingId(s.id);
 setEmployeeId(s.employee_id);
+setHouseName(s.houseName || "");
 setWorkDate(s.work_date);
-setHouseName(s.house_name || "");
 setStartTime(s.start_time || "");
 setEndTime(s.end_time || "");
 setMileage(s.mileage != null ? String(s.mileage) : "");
@@ -146,8 +146,8 @@ window.scrollTo({ top: 0, behavior: "smooth" });
 
 function resetForm() {
 setEditingId(null);
-setWorkDate("");
 setHouseName("");
+setWorkDate("");
 setStartTime("");
 setEndTime("");
 setMileage("");
@@ -188,8 +188,8 @@ return;
 const payload = {
 org_id: orgId,
 employee_id: employeeId,
-work_date: workDate,
 house_name: houseName.trim() || null,
+work_date: workDate,
 start_time: startTime || null,
 end_time: endTime || null,
 mileage: parsedMileage,
@@ -337,6 +337,15 @@ style={inputStyle}
 </div>
 
 <div>
+<label style={labelStyle}>House</label>
+<input
+type="text"
+placeholder="Ex: Maple House"
+value={houseName}
+onChange={(e) => setHouseName(e.target.value)}
+style={inputStyle}/>
+
+<div>
 <label style={labelStyle}>Work Date</label>
 <input
 type="date"
@@ -346,14 +355,7 @@ style={inputStyle}
 />
 </div>
 
-<div>
-<label style={labelStyle}>House</label>
-<input
-type="text"
-placeholder="Ex: Maple House"
-value={houseName}
-onChange={(e) => setHouseName(e.target.value)}
-style={inputStyle}/>
+
 
 </div>
 <div style={twoCol}>

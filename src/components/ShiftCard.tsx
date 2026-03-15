@@ -3,6 +3,7 @@
 type Shift = {
 id: string;
 employee_id: string;
+houseName: string | null;
 work_date: string;
 start_time: string | null;
 end_time: string | null;
@@ -76,6 +77,11 @@ Delete
 <div style={metaCard}>
 <div style={metaLabel}>Time</div>
 <div style={metaValue}>{formatTimeRange(shift.start_time, shift.end_time)}</div>
+</div>
+
+<div style={metaCard}>
+<div style={metaLabel}>House</div>
+<div style={metaValue}>{shift.houseName || "—"}</div>
 </div>
 
 <div style={metaCard}>
