@@ -350,22 +350,44 @@ return (
 
 return (
 <main style={{ padding: 24, maxWidth: 900, margin: "0 auto" }}>
-<h1>CareClock Employee Time</h1>
+<div
+style={{
+display: "flex",
+justifyContent: "space-between",
+alignItems: "center",
+marginBottom: 24,
+}}
+>
+<h1 style={{ margin: 0 }}>CareClock Employee Time</h1>
 
-{employee ? (
-<p style={{ opacity: 0.75, marginTop: 4 }}>
-Logged in as <strong>{employee.name}</strong> ({employee.email})
-</p>
-) : null}
+<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+{employee && (
+<span style={{ fontSize: 14, opacity: 0.75 }}>
+{employee.name}
+</span>
+)}
 
 <button
 onClick={async () => {
 await supabase.auth.signOut();
 router.push("/login");
 }}
+style={{
+padding: "8px 14px",
+background: "#111",
+color: "white",
+border: "none",
+borderRadius: 8,
+fontWeight: 600,
+cursor: "pointer",
+fontSize: 13,
+}}
 >
 Sign Out
 </button>
+</div>
+</div>
+
 
 <div style={cardStyle}>
 <p>
