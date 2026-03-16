@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../../supabaseClient";
 import ShiftCard from "../../components/ShiftCard";
 import WeeklySchedule from "../../components/WeeklySchedule";
-
+import type { Schedule } from "@/components/WeeklySchedule";
 
 
 type ProfileRow = {
@@ -19,18 +19,7 @@ id: string;
 name: string;
 };
 
-type Schedule = {
-id: string;
-employee_id: string;
-org_id?: string;
-house_name: string | null;
-work_date: string;
-start_time: string | null;
-end_time: string | null;
-mileage: number | null;
-is_outing: boolean | null;
-daily_log: string | null;
-};
+
 
 export default function SchedulingPage() {
 const router = useRouter();
@@ -156,6 +145,18 @@ setMileage("");
 setIsOuting(false);
 setDailyLog("");
 }
+
+function handleEditShift(shift: Schedule) {
+    setEditingId(shift.id);
+    setEmployeeId(shift.employee_id);
+    setHouseName(shift.house_name ?? "");
+    setWorkDate(shift.work_date);
+    setStartTime(shift.start_time ?? "");
+    setEndTime(shift.end_time ?? "");
+    setIsOuting(Boolean(shift.is_outing));
+    
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    }
 
 function handleAddShiftFromCalendar(house: string, day: string) {
     setHouseName(house);
@@ -466,6 +467,8 @@ Create your first shift to start building the schedule.
 {schedules.map((s) => {
 const employee = employees.find((e) => e.id === s.employee_id);
 
+
+
 return (
 <ShiftCard
 key={s.id}
@@ -486,7 +489,9 @@ onDelete={() => deleteShift(s.id)}
 schedules={schedules}
 employees={employees}
 onAddShift={handleAddShiftFromCalendar}
-/></div>
+onEditShift={handleEditShift}
+/>
+</div>
 </main>
 );
 }

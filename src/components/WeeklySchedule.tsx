@@ -3,15 +3,18 @@
 import { useState } from "react";
 import { formatAppTimeRange } from "../lib/time";
 
-type Schedule = {
-id: string;
-employee_id: string;
-house_name: string | null;
-work_date: string;
-start_time: string | null;
-end_time: string | null;
-is_outing: boolean | null;
-};
+export type Schedule = {
+    id: string;
+    employee_id: string;
+    org_id?: string;
+    house_name: string | null;
+    work_date: string;
+    start_time: string | null;
+    end_time: string | null;
+    mileage: number | null;
+    is_outing: boolean | null;
+    daily_log: string | null;
+    };
 
 type Employee = {
 id: string;
@@ -22,6 +25,7 @@ type WeeklyScheduleProps = {
 schedules: Schedule[];
 employees: Employee[];
 onAddShift: (house: string, day: string) => void;
+onEditShift: (shift: Schedule) => void;
 };
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -51,12 +55,16 @@ export default function WeeklySchedule({
 schedules,
 employees,
 onAddShift,
+onEditShift,
 }: WeeklyScheduleProps) {
 const houses = Array.from(
-new Set(schedules.map((s) => s.house_name?.trim()).filter(Boolean))
+new Set(
+schedules.map((s) => s.house_name?.trim()).filter(Boolean)
+)
 ) as string[];
 
 const [weekStart, setWeekStart] = useState(getWeekStartSunday());
+
 const weekEnd = new Date(weekStart);
 weekEnd.setDate(weekStart.getDate() + 6);
 
@@ -96,7 +104,9 @@ window.print();
 
 return (
 <section style={sectionStyle} className="weekly-schedule-print">
+
 <div style={headerRow}>
+
 <button onClick={goPrevWeek} style={navBtn}>
 ◀ Previous
 </button>
@@ -112,10 +122,12 @@ return (
 <button onClick={goNextWeek} style={navBtn}>
 Next ▶
 </button>
+
 <button onClick={handleExportPdf} style={exportBtn}>
 Export PDF
 </button>
 </div>
+
 </div>
 
 {houses.length === 0 ? (
@@ -123,6 +135,7 @@ Export PDF
 ) : (
 <div style={boardWrap}>
 <table style={tableStyle}>
+
 <thead>
 <tr>
 <th style={houseHeaderStyle}>House</th>
@@ -137,60 +150,88 @@ Export PDF
 <tbody>
 {houses.map((house) => (
 <tr key={house}>
-<td style={houseCellStyle}>{house}</td>
+
+<td style={houseCellStyle}>
+{house}
+</td>
 
 {DAYS.map((day) => {
+
 const cellShifts = getCellShifts(house, day);
 
 return (
 <td key={day} style={cellStyle}>
+
 {cellShifts.length === 0 ? (
+
 <button
 style={addBtn}
 onClick={() => onAddShift(house, day)}
 >
 + Add
 </button>
+
 ) : (
+
 <div style={shiftStackStyle}>
+
 {cellShifts.map((shift) => (
-<div key={shift.id} style={shiftPillStyle}>
+
+<div
+key={shift.id}
+style={shiftPillStyle}
+onClick={() => onEditShift(shift)}
+>
+
 <div style={shiftNameStyle}>
 {getEmployeeName(shift.employee_id)}
 </div>
+
 <div style={shiftTimeStyle}>
 {formatAppTimeRange(
 shift.start_time,
 shift.end_time
 )}
 </div>
+
 {shift.is_outing ? (
-<div style={outingBadge}>Outing</div>
+<div style={outingBadge}>
+Outing
+</div>
 ) : null}
+
 </div>
+
 ))}
+
 </div>
+
 )}
+
 </td>
 );
+
 })}
+
 </tr>
 ))}
 </tbody>
+
 </table>
 </div>
 )}
+
 </section>
 );
 }
 
 const sectionStyle: React.CSSProperties = {
 marginTop: 28,
-background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+background: "linear-gradient(180deg,#ffffff 0%,#f8fafc 100%)",
 border: "1px solid #e5e7eb",
 borderRadius: 20,
 padding: 20,
-boxShadow: "0 10px 28px rgba(15, 23, 42, 0.06)",
+boxShadow: "0 10px 28px rgba(15,23,42,0.06)",
 };
 
 const headerRow: React.CSSProperties = {
@@ -209,7 +250,7 @@ fontSize: 26,
 
 const subTextStyle: React.CSSProperties = {
 margin: "6px 0 0 0",
-opacity: 0.68,
+opacity: 0.7,
 fontSize: 14,
 };
 
@@ -268,7 +309,6 @@ padding: "16px",
 borderBottom: "1px solid #f1f5f9",
 verticalAlign: "top",
 fontWeight: 700,
-color: "#0f172a",
 };
 
 const cellStyle: React.CSSProperties = {
@@ -288,6 +328,7 @@ background: "#eff6ff",
 border: "1px solid #bfdbfe",
 borderRadius: 12,
 padding: "10px",
+cursor: "pointer",
 };
 
 const shiftNameStyle: React.CSSProperties = {
