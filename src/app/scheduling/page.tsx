@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "../../supabaseClient";
 import ShiftCard from "../../components/ShiftCard";
 import WeeklySchedule from "../../components/WeeklySchedule";
 import type { Schedule } from "@/components/WeeklySchedule";
-
 
 type ProfileRow = {
 id: string;
@@ -19,10 +18,10 @@ id: string;
 name: string;
 };
 
-
-
 export default function SchedulingPage() {
 const router = useRouter();
+const searchParams = useSearchParams();
+const editId = searchParams.get("edit");
 
 const [authReady, setAuthReady] = useState(false);
 const [orgId, setOrgId] = useState<string | null>(null);
@@ -43,6 +42,9 @@ const [editingId, setEditingId] = useState<string | null>(null);
 const [loading, setLoading] = useState(true);
 const [saving, setSaving] = useState(false);
 const [error, setError] = useState<string | null>(null);
+
+const [selectedShiftEmployeeId, setSelectedShiftEmployeeId] = useState("all");
+const [shiftSearch, setShiftSearch] = useState("");
 
 async function checkAdminAndLoadData() {
 setLoading(true);
@@ -122,16 +124,17 @@ return;
 setSchedules((data ?? []) as Schedule[]);
 }
 
-function editShift(s: Schedule) {
-setEditingId(s.id);
-setEmployeeId(s.employee_id);
-setHouseName(s.house_name || "");
-setWorkDate(s.work_date);
-setStartTime(s.start_time || "");
-setEndTime(s.end_time || "");
-setMileage(s.mileage != null ? String(s.mileage) : "");
-setIsOuting(Boolean(s.is_outing));
-setDailyLog(s.daily_log || "");
+function handleEditShift(shift: Schedule) {
+setEditingId(shift.id);
+setEmployeeId(shift.employee_id);
+setHouseName(shift.house_name ?? "");
+setWorkDate(shift.work_date);
+setStartTime(shift.start_time ?? "");
+setEndTime(shift.end_time ?? "");
+setMileage(shift.mileage != null ? String(shift.mileage) : "");
+setIsOuting(Boolean(shift.is_outing));
+setDailyLog(shift.daily_log ?? "");
+
 window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -146,31 +149,28 @@ setIsOuting(false);
 setDailyLog("");
 }
 
-function handleEditShift(shift: Schedule) {
-    setEditingId(shift.id);
-    setEmployeeId(shift.employee_id);
-    setHouseName(shift.house_name ?? "");
-    setWorkDate(shift.work_date);
-    setStartTime(shift.start_time ?? "");
-    setEndTime(shift.end_time ?? "");
-    setIsOuting(Boolean(shift.is_outing));
-    
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
 function handleAddShiftFromCalendar(house: string, day: string) {
-    setHouseName(house);
-    
-    const date = new Date();
-    const targetDay = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(day);
-    
-    const diff = targetDay - date.getDay();
-    date.setDate(date.getDate() + diff);
-    
-    setWorkDate(date.toISOString().slice(0,10));
-    
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    }
+setHouseName(house);
+
+const date = new Date();
+const targetDay = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].indexOf(
+day
+);
+
+const diff = targetDay - date.getDay();
+date.setDate(date.getDate() + diff);
+
+const localDate = new Intl.DateTimeFormat("en-CA", {
+timeZone: "America/Los_Angeles",
+year: "numeric",
+month: "2-digit",
+day: "2-digit",
+}).format(date);
+
+setWorkDate(localDate);
+
+window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
 async function saveSchedule(e: React.FormEvent) {
 e.preventDefault();
@@ -193,8 +193,7 @@ return;
 
 setSaving(true);
 
-const parsedMileage =
-mileage.trim() === "" ? null : Number(mileage);
+const parsedMileage = mileage.trim() === "" ? null : Number(mileage);
 
 if (parsedMileage !== null && Number.isNaN(parsedMileage)) {
 setError("Mileage must be a valid number.");
@@ -267,10 +266,30 @@ useEffect(() => {
 void checkAdminAndLoadData();
 }, []);
 
+useEffect(() => {
+if (!editId || schedules.length === 0) return;
+
+const shiftToEdit = schedules.find((s) => s.id === editId);
+if (shiftToEdit) {
+handleEditShift(shiftToEdit);
+}
+}, [editId, schedules]);
+
 const selectedEmployeeName =
 employees.find((emp) => emp.id === employeeId)?.name ?? "None selected";
 
 const upcomingCount = useMemo(() => schedules.length, [schedules]);
+
+const filteredEmployeeOptions = useMemo(() => {
+return employees.filter((emp) =>
+emp.name.toLowerCase().includes(shiftSearch.toLowerCase())
+);
+}, [employees, shiftSearch]);
+
+const visibleSchedules = useMemo(() => {
+if (selectedShiftEmployeeId === "all") return schedules;
+return schedules.filter((s) => s.employee_id === selectedShiftEmployeeId);
+}, [schedules, selectedShiftEmployeeId]);
 
 if (!authReady && loading) {
 return (
@@ -297,7 +316,9 @@ Sign Out
 
 {error && (
 <div style={errorCard}>
-<strong style={{ display: "block", marginBottom: 4 }}>Something went wrong</strong>
+<strong style={{ display: "block", marginBottom: 4 }}>
+Something went wrong
+</strong>
 <span>{error}</span>
 </div>
 )}
@@ -324,16 +345,10 @@ Sign Out
 <div style={panelHeader}>
 <div>
 <h2 style={panelTitle}>{editingId ? "Edit Shift" : "Create Shift"}</h2>
-<p style={panelSub}>
-Build a cleaner weekly plan for your team.
-</p>
+<p style={panelSub}>Build a cleaner weekly plan for your team.</p>
 </div>
 
-{editingId && (
-<span style={editingBadge}>
-Editing
-</span>
-)}
+{editingId && <span style={editingBadge}>Editing</span>}
 </div>
 
 <form onSubmit={saveSchedule} style={formGrid}>
@@ -360,7 +375,9 @@ type="text"
 placeholder="Ex: Maple House"
 value={houseName}
 onChange={(e) => setHouseName(e.target.value)}
-style={inputStyle}/>
+style={inputStyle}
+/>
+</div>
 
 <div>
 <label style={labelStyle}>Work Date</label>
@@ -372,9 +389,6 @@ style={inputStyle}
 />
 </div>
 
-
-
-</div>
 <div style={twoCol}>
 <div>
 <label style={labelStyle}>Start Time</label>
@@ -430,11 +444,7 @@ style={textareaStyle}
 
 <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
 <button type="submit" style={primaryBtn}>
-{saving
-? "Saving..."
-: editingId
-? "Save Changes"
-: "Create Shift"}
+{saving ? "Saving..." : editingId ? "Save Changes" : "Create Shift"}
 </button>
 
 {editingId && (
@@ -454,27 +464,54 @@ Cancel Edit
 </div>
 </div>
 
-{schedules.length === 0 ? (
+<div style={{ display: "grid", gap: 12, marginBottom: 16 }}>
+<div>
+<label style={labelStyle}>Search Employee</label>
+<input
+type="text"
+placeholder="Type employee name..."
+value={shiftSearch}
+onChange={(e) => setShiftSearch(e.target.value)}
+style={inputStyle}
+/>
+</div>
+
+<div>
+<label style={labelStyle}>Filter Scheduled Shifts</label>
+<select
+value={selectedShiftEmployeeId}
+onChange={(e) => setSelectedShiftEmployeeId(e.target.value)}
+style={inputStyle}
+>
+<option value="all">All Employees</option>
+{filteredEmployeeOptions.map((emp) => (
+<option key={emp.id} value={emp.id}>
+{emp.name}
+</option>
+))}
+</select>
+</div>
+</div>
+
+{visibleSchedules.length === 0 ? (
 <div style={emptyState}>
 <div style={{ fontSize: 30 }}>📅</div>
-<p style={{ margin: 0, fontWeight: 600 }}>No scheduled shifts yet</p>
+<p style={{ margin: 0, fontWeight: 600 }}>No scheduled shifts found</p>
 <p style={{ margin: 0, opacity: 0.7 }}>
-Create your first shift to start building the schedule.
+Try another employee or create a new shift.
 </p>
 </div>
 ) : (
 <div style={{ display: "grid", gap: 12 }}>
-{schedules.map((s) => {
+{visibleSchedules.map((s) => {
 const employee = employees.find((e) => e.id === s.employee_id);
-
-
 
 return (
 <ShiftCard
 key={s.id}
 shift={s}
 employee={employee}
-onEdit={() => editShift(s)}
+onEdit={() => handleEditShift(s)}
 onDelete={() => deleteShift(s.id)}
 />
 );

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { supabase } from "../../../supabaseClient";
+import { formatAppDateTime, formatAppDate } from "../../../lib/time";
 
 const LocationMap = dynamic(() => import("../../../components/LocationMap"), {
 ssr: false,
@@ -62,17 +63,7 @@ const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 return earthRadius * c;
 }
 
-function formatDateTime(value: string | null) {
-if (!value) return "—";
 
-return new Date(value).toLocaleString("en-US", {
-month: "short",
-day: "numeric",
-year: "numeric",
-hour: "numeric",
-minute: "2-digit",
-});
-}
 
 async function loadEmployeeAndClockLog() {
 const {
@@ -476,10 +467,10 @@ radiusMeters={ALLOWED_RADIUS_METERS}
 <div style={logCardStyle}>
 <h3 style={{ marginTop: 0, marginBottom: 12 }}>Latest Time Activity</h3>
 <p style={{ margin: "6px 0" }}>
-<strong>Last Clock In:</strong> {formatDateTime(lastClockIn)}
+<strong>Last Clock In:</strong> {formatAppDateTime(lastClockIn)}
 </p>
 <p style={{ margin: "6px 0" }}>
-<strong>Last Clock Out:</strong> {formatDateTime(lastClockOut)}
+<strong>Last Clock Out:</strong> {formatAppDateTime(lastClockOut)}
 </p>
 </div>
 </main>

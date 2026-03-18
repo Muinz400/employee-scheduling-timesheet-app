@@ -1,9 +1,17 @@
 export const APP_TIMEZONE = "America/Los_Angeles";
 
-export function formatAppDate(value: string | null) {
-if (!value) return "—";
+function normalizeUtcValue(value: string | null) {
+if (!value) return null;
 
-return new Date(value).toLocaleDateString("en-US", {
+const hasTimezone = /([zZ]|[+-]\d{2}:\d{2})$/.test(value);
+return hasTimezone ? value : `${value}Z`;
+}
+
+export function formatAppDate(value: string | null) {
+const normalized = normalizeUtcValue(value);
+if (!normalized) return "—";
+
+return new Date(normalized).toLocaleDateString("en-US", {
 weekday: "short",
 month: "short",
 day: "numeric",
@@ -13,9 +21,10 @@ timeZone: APP_TIMEZONE,
 }
 
 export function formatAppDateTime(value: string | null) {
-if (!value) return "—";
+const normalized = normalizeUtcValue(value);
+if (!normalized) return "—";
 
-return new Date(value).toLocaleString("en-US", {
+return new Date(normalized).toLocaleString("en-US", {
 month: "short",
 day: "numeric",
 year: "numeric",
@@ -31,13 +40,22 @@ if (!time) return "—";
 return new Date(`1970-01-01T${time}`).toLocaleTimeString("en-US", {
 hour: "numeric",
 minute: "2-digit",
-timeZone: APP_TIMEZONE,
 });
 }
 
 export function formatAppTimeRange(start: string | null, end: string | null) {
 if (!start || !end) return "—";
-return `${formatAppTime(start)} – ${formatAppTime(end)}`;
+return `${formatAppTime(start)} - ${formatAppTime(end)}`;
 }
 
+export function getAppDateKey(value: string | null) {
+const normalized = normalizeUtcValue(value);
+if (!normalized) return "unknown";
 
+return new Intl.DateTimeFormat("en-CA", {
+timeZone: APP_TIMEZONE,
+year: "numeric",
+month: "2-digit",
+day: "2-digit",
+}).format(new Date(normalized));
+}

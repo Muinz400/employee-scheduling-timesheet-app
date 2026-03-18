@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../supabaseClient";
+import { formatAppDateTime, formatAppDate } from "../../../lib/time";
 
 type EmployeeRow = {
 id: string;
@@ -112,17 +113,7 @@ return sum + (end - start) / (1000 * 60 * 60);
 }, 0);
 }, [logs]);
 
-function formatDateTime(value: string | null) {
-if (!value) return "—";
 
-return new Date(value).toLocaleString("en-US", {
-month: "short",
-day: "numeric",
-year: "numeric",
-hour: "numeric",
-minute: "2-digit",
-});
-}
 
 function formatHours(clockIn: string | null, clockOut: string | null) {
 if (!clockIn) return "—";
@@ -199,7 +190,7 @@ Review your worked hours from clock logs.
 
 <div style={summaryCard}>
 <div style={summaryLabel}>Total Logged Hours</div>
-<div style={summaryValue}>{totalHours.toFixed(2)}</div>
+<div style={summaryValue}>{totalHours.toFixed(2)} hrs</div>
 </div>
 </div>
 )}
@@ -228,19 +219,14 @@ Error: {error}
 </thead>
 <tbody>
 {logs.map((log) => {
-const dateLabel = log.clock_in
-? new Date(log.clock_in).toLocaleDateString("en-US", {
-month: "short",
-day: "numeric",
-year: "numeric",
-})
-: "—";
+const dateLabel = formatAppDate(log.clock_in)
+
 
 return (
 <tr key={log.id}>
 <td style={tdStyle}>{dateLabel}</td>
-<td style={tdStyle}>{formatDateTime(log.clock_in)}</td>
-<td style={tdStyle}>{formatDateTime(log.clock_out)}</td>
+<td style={tdStyle}>{formatAppDateTime(log.clock_in)}</td>
+<td style={tdStyle}>{formatAppDateTime(log.clock_out)}</td>
 <td style={tdStyle}>{formatHours(log.clock_in, log.clock_out)}</td>
 <td style={tdStyle}>
 {log.latitude != null && log.longitude != null

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { supabase } from "../../../supabaseClient";
+import { formatAppDateTime, formatAppDate } from "../../../lib/time";
 
 const ORG_ID = process.env.NEXT_PUBLIC_ORG_ID;
 
@@ -52,13 +53,8 @@ function formatTime(time: string) {
 }
 
 function formatDate(date: string) {
-  const d = new Date(date);
-
-  return d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return formatAppDate(date);
+  
 }
 
 export default function TimesheetDetailPage() {

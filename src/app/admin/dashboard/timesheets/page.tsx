@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../../supabaseClient";
 import React from "react";
+import { formatAppDate, formatAppDateTime } from "../../../../lib/time";
 
 type ProfileRow = {
 id: string;
@@ -112,7 +113,9 @@ setError(null);
 
 const { data, error } = await supabase
 .from("clock_logs")
-.select("id, employee_id, clock_in, clock_out, latitude, longitude, created_at")
+.select(
+"id, employee_id, clock_in, clock_out, latitude, longitude, created_at"
+)
 .eq("employee_id", employeeId)
 .order("clock_in", { ascending: false });
 
@@ -136,7 +139,8 @@ void loadLogs(selectedEmployeeId);
 }
 }, [selectedEmployeeId]);
 
-const selectedEmployee = employees.find((emp) => emp.id === selectedEmployeeId) ?? null;
+const selectedEmployee =
+employees.find((emp) => emp.id === selectedEmployeeId) ?? null;
 
 const totalHours = useMemo(() => {
 return logs.reduce((sum, log) => {
@@ -151,68 +155,48 @@ return sum + (end - start) / (1000 * 60 * 60);
 }, 0);
 }, [logs]);
 
-
 const groupedLogs = useMemo(() => {
-    const groups: Record<string, ClockLogRow[]> = {};
-    
-    for (const log of logs) {
-    const key = getDateLabel(log.clock_in);
-    
-    if (!groups[key]) {
-    groups[key] = [];
-    }
-    
-    groups[key].push(log);
-    }
-    
-    return Object.entries(groups);
-    }, [logs]);
+const groups: Record<string, ClockLogRow[]> = {};
 
-function formatDateTime(value: string | null) {
-if (!value) return "—";
+for (const log of logs) {
+const key = getAppDateLabel(log.clock_in);
 
-return new Date(value).toLocaleString("en-US", {
-month: "short",
-day: "numeric",
-year: "numeric",
-hour: "numeric",
-minute: "2-digit",
-});
+if (!groups[key]) {
+groups[key] = [];
 }
 
+groups[key].push(log);
+}
+
+return Object.entries(groups);
+}, [logs]);
+
 function getHoursNumber(clockIn: string | null, clockOut: string | null) {
-    if (!clockIn || !clockOut) return null;
-    
-    const start = new Date(clockIn).getTime();
-    const end = new Date(clockOut).getTime();
-    
-    if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return null;
-    
-    return (end - start) / (1000 * 60 * 60);
-    }
-    
-    function formatHoursDetailed(clockIn: string | null, clockOut: string | null) {
-    if (!clockIn) return "—";
-    if (!clockOut) return "Active";
-    
-    const hours = getHoursNumber(clockIn, clockOut);
-    if (hours == null) return "—";
-    
-    const totalMinutes = Math.round(hours * 60);
-    
-    return `${hours.toFixed(2)} hrs (${totalMinutes} min)`;
-    }
-    
-    function getDateLabel(value: string | null) {
-    if (!value) return "Unknown Date";
-    
-    return new Date(value).toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    });
-    }
+if (!clockIn || !clockOut) return null;
+
+const start = new Date(clockIn).getTime();
+const end = new Date(clockOut).getTime();
+
+if (Number.isNaN(start) || Number.isNaN(end) || end <= start) return null;
+
+return (end - start) / (1000 * 60 * 60);
+}
+
+function formatHoursDetailed(clockIn: string | null, clockOut: string | null) {
+if (!clockIn) return "—";
+if (!clockOut) return "Active";
+
+const hours = getHoursNumber(clockIn, clockOut);
+if (hours == null) return "—";
+
+const totalMinutes = Math.round(hours * 60);
+
+return `${hours.toFixed(2)} hrs (${totalMinutes} min)`;
+}
+
+function getAppDateLabel(value: string | null) {
+return formatAppDate(value);
+}
 
 function formatHours(clockIn: string | null, clockOut: string | null) {
 if (!clockIn) return "—";
@@ -234,8 +218,6 @@ return (
 </main>
 );
 }
-
-
 
 return (
 <main style={{ maxWidth: 1100, margin: "40px auto", padding: 20 }}>
@@ -328,23 +310,21 @@ borderBottom: "1px solid #e5e7eb",
 
 {dayLogs.map((log) => (
 <tr key={log.id}>
+<td style={tdStyle}>{formatAppDate(log.clock_in)}</td>
 <td style={tdStyle}>
-{log.clock_in
-? new Date(log.clock_in).toLocaleDateString("en-US", {
-month: "short",
-day: "numeric",
-year: "numeric",
-})
-: "—"}
+{formatAppDateTime(log.clock_in)}
 </td>
-<td style={tdStyle}>{formatDateTime(log.clock_in)}</td>
-<td style={tdStyle}>{formatDateTime(log.clock_out)}</td>
+<td style={tdStyle}>
+{formatAppDateTime(log.clock_out)}
+</td>
 <td style={tdStyle}>
 {formatHoursDetailed(log.clock_in, log.clock_out)}
 </td>
 <td style={tdStyle}>
 {log.latitude != null && log.longitude != null
-? `${Number(log.latitude).toFixed(5)}, ${Number(log.longitude).toFixed(5)}`
+? `${Number(log.latitude).toFixed(5)}, ${Number(
+log.longitude
+).toFixed(5)}`
 : "—"}
 </td>
 </tr>
@@ -352,7 +332,6 @@ year: "numeric",
 </React.Fragment>
 ))}
 </tbody>
-
 </table>
 </div>
 )}

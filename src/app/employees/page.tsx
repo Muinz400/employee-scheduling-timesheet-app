@@ -11,7 +11,7 @@ Access your shifts, clock-ins, and timesheets.
 <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
 <Link href="/employee/shifts" style={cardStyle}>My Shifts</Link>
 <Link href="/employee/clock" style={cardStyle}>Clock In / Out</Link>
-<Link href="/employee/timesheets" style={cardStyle}>My Timesheets</Link>
+<Link href="timesheets" style={cardStyle}>My Timesheets</Link>
 <Link href="/employee/profile" style={cardStyle}>My Profile</Link>
 </div>
 </main>

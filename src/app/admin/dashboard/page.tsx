@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../supabaseClient";
+import { formatAppDateTime, formatAppDate } from "../../../lib/time";
 
 type Employee = {
 id: string;
@@ -27,17 +28,7 @@ status: "Clocked In" | "Clocked Out" | "No Activity";
 houseName: string | null;
 };
 
-function formatDateTime(value: string | null) {
-if (!value) return "—";
 
-return new Date(value).toLocaleString("en-US", {
-month: "short",
-day: "numeric",
-year: "numeric",
-hour: "numeric",
-minute: "2-digit",
-});
-}
 
 function calculateHours(clockIn: string | null, clockOut: string | null) {
 if (!clockIn || !clockOut) return "-";
@@ -129,8 +120,7 @@ if (logError) {
 throw logError;
 }
 
-let status: "Clocked In" | "Clocked Out" | "No Activity" =
-"No Activity";
+let status: "Clocked In" | "Clocked Out" | "No Activity" = "No Activity";
 
 if (latestLog) {
 status =
@@ -281,13 +271,8 @@ Live employee clock activity and latest timesheet status.
 Auto-refreshing every 3 seconds
 </p>
 
-<div
-style={{ display: "flex", gap: 16, marginBottom: 24, flexWrap: "wrap" }}
->
-<button
-style={navBtnStyle}
-onClick={() => router.push("/admin/dashboard")}
->
+<div style={{ display: "flex", gap: 16, marginBottom: 24, flexWrap: "wrap" }}>
+<button style={navBtnStyle} onClick={() => router.push("/admin/employees")}>
 Employees
 </button>
 
@@ -302,7 +287,12 @@ Payroll
 <button style={navBtnStyle} onClick={() => router.push("/scheduling")}>
 Scheduling
 </button>
+
+<button style={navBtnStyle} onClick={() => router.push("/admin/shifts")}>
+Shifts
+</button>
 </div>
+
 
 <div
 style={{
@@ -317,12 +307,7 @@ background: "white",
 
 <form
 onSubmit={handleAddEmployee}
-style={{
-display: "flex",
-gap: 12,
-flexWrap: "wrap",
-alignItems: "center",
-}}
+style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}
 >
 <input
 type="text"
@@ -451,11 +436,11 @@ row.status === "Clocked In"
 </td>
 
 <td style={tdStyle}>
-{formatDateTime(row.latestLog?.clock_in ?? null)}
+{formatAppDateTime(row.latestLog?.clock_in ?? null)}
 </td>
 
 <td style={tdStyle}>
-{formatDateTime(row.latestLog?.clock_out ?? null)}
+{formatAppDateTime(row.latestLog?.clock_out ?? null)}
 </td>
 
 <td style={tdStyle}>
@@ -507,3 +492,4 @@ padding: "14px 16px",
 borderBottom: "1px solid #e5e7eb",
 fontSize: 14,
 };
+
