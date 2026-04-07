@@ -1,14 +1,18 @@
-Workforce Scheduling & Timesheet Management System
+**Workforce Scheduling & Timesheet Management System**
 
-Overview
+
+**Overview**
 This project is a full-stack workforce management system designed to help organizations streamline employee scheduling, time tracking, and payroll preparation workflows.
 
+
 The system centralizes scheduling, clock-ins, and timesheet records in one place, reducing manual work and improving organization.
+
 
 This project was built to simulate a real-world internal operations tool used by teams managing multiple employees across multiple locations.
 
 
-Problem
+
+**Problem**
 Many organizations rely on manual processes to manage:
 employee schedules
 paper timesheets
@@ -17,28 +21,33 @@ shift documentation
 mileage tracking
 
 
-Manual workflows can:
+
+**Manual workflows can:**
 require significant administrative time
 increase risk of calculation errors
 make records harder to track
 create inefficiencies in payroll preparation
 
 
+
 The goal of this project was to design a simple system that organizes these workflows digitally while keeping the process familiar and easy to adopt.
 
 
-Solution
+
+**Solution**
 The application provides a centralized interface where employees and administrators can manage schedules, track hours, and maintain records efficiently.
 
 
-Employees can:
+
+**Employees can:**
 clock in and clock out digitally
 view assigned shifts
 record mileage
 add daily shift notes
 
 
-Administrators can:
+
+**Administrators can:**
 create and manage schedules
 monitor employee activity
 review timesheets
@@ -47,68 +56,79 @@ estimate payroll totals
 export schedules as PDF
 
 
-Key Features
+
+**Key Features**
 Authentication & Role-Based Access
 Secure login using Supabase Auth
 Separate Admin and Employee permissions
 Row Level Security policies applied to protect data access
 
 
-Employee Clock In / Clock Out
+
+**Employee Clock In / Clock Out**
 Employees can clock in and out digitally
 System records timestamps automatically
 Location coordinates captured for verification
 Total worked hours calculated automatically
 
 
-Timesheet Tracking
+
+**Timesheet Tracking**
 Employees can review worked hours in one place
 Total hours automatically calculated
 Structured records ready for payroll preparation
 
 
-Weekly Schedule Management
+
+**Weekly Schedule Management**
 Admin can create and edit shifts
 Weekly calendar grouped by house and day
 Supports multiple employees across multiple locations
 Shifts can be added directly from weekly calendar interface
 
 
-Mileage & Shift Documentation
+
+**Mileage & Shift Documentation**
 Employees can log mileage per shift
 Daily shift notes stored with schedule records
 Improves documentation and accountability
 
 
-Payroll Preparation Support
+
+**Payroll Preparation Support**
 Calculates total hours worked per employee
 Date range filtering for payroll periods
 Simplifies payroll preparation workflow
 
 
-PDF Export
+
+**PDF Export**
 Weekly schedules can be exported as PDF
 Allows easy sharing or printing of schedules
 
 
-Tech Stack
+
+**Tech Stack**
 Frontend:
 Next.js (React framework)
 TypeScript
 CSS styling
 
 
-Backend:
+
+**Backend:**
 Supabase
 PostgreSQL database
 Row Level Security (RLS)
 
 
-Deployment:
+
+**Deployment:**
 Vercel
 
 
-Database Structure
+
+**Database Structure**
 Main tables:
 employees
 clock_logs
@@ -118,13 +138,15 @@ profiles
 employee_payroll_settings
 
 
-Relationships:
+
+**Relationships:**
 employees linked to schedules and clock logs
 schedules linked to houses
 profiles linked to authentication roles
 
 
-Example Workflow
+
+**Example Workflow**
 Employee clocks in
 System stores timestamp in database
 Admin can view real-time activity
@@ -134,7 +156,8 @@ Admin reviews timesheets
 Payroll preparation simplified
 
 
-Key Learning Outcomes
+
+**Key Learning Outcomes**
 Designing relational database schema
 Implementing role-based authentication
 Building dynamic scheduling interfaces
@@ -144,7 +167,8 @@ Structuring business logic for payroll preparation
 Designing internal tools for operational workflows
 
 
-Future Improvements
+
+**Future Improvements**
 Mobile optimization
 Shift notifications
 CSV export functionality
@@ -153,10 +177,8 @@ Enhanced reporting features
 Role permission customization
 
 
-Live Demo
+**Live Demo**
 https://care-clock-swart.vercel.app
-
-
 
 
 
