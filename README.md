@@ -2,6 +2,8 @@
 
 
 **Overview**
+
+
 This project is a full-stack workforce management system designed to help organizations streamline employee scheduling, time tracking, and payroll preparation workflows.
 
 
@@ -55,6 +57,7 @@ The goal of this project was to design a simple system that organizes these work
 The application provides a centralized interface where employees and administrators can manage schedules, track hours, and maintain records efficiently.
 
 
+
 **Employees can:**
 
 clock in and clock out digitally
@@ -80,6 +83,7 @@ calculate total worked hours
 estimate payroll totals
 
 export schedules as PDF
+
 
 
 
