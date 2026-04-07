@@ -1,4 +1,4 @@
-**Workforce Scheduling & Timesheet Management System**
+## Workforce Scheduling & Timesheet Management System
 
 
 **Overview**
@@ -10,178 +10,262 @@ The system centralizes scheduling, clock-ins, and timesheet records in one place
 
 This project was built to simulate a real-world internal operations tool used by teams managing multiple employees across multiple locations.
 
+---
 
+## Problem
 
-**Problem**
 Many organizations rely on manual processes to manage:
+
 employee schedules
+
 paper timesheets
+
 manual hour calculations
+
 shift documentation
+
 mileage tracking
 
 
 
 **Manual workflows can:**
+
 require significant administrative time
+
 increase risk of calculation errors
+
 make records harder to track
+
 create inefficiencies in payroll preparation
 
 
 
 The goal of this project was to design a simple system that organizes these workflows digitally while keeping the process familiar and easy to adopt.
 
+---
 
+## Solution
 
-**Solution**
 The application provides a centralized interface where employees and administrators can manage schedules, track hours, and maintain records efficiently.
 
 
-
 **Employees can:**
+
 clock in and clock out digitally
+
 view assigned shifts
+
 record mileage
+
 add daily shift notes
 
 
 
 **Administrators can:**
+
 create and manage schedules
+
 monitor employee activity
+
 review timesheets
+
 calculate total worked hours
+
 estimate payroll totals
+
 export schedules as PDF
 
 
 
 **Key Features**
+
 Authentication & Role-Based Access
+
 Secure login using Supabase Auth
+
 Separate Admin and Employee permissions
+
 Row Level Security policies applied to protect data access
 
 
 
 **Employee Clock In / Clock Out**
+
 Employees can clock in and out digitally
+
 System records timestamps automatically
+
 Location coordinates captured for verification
+
 Total worked hours calculated automatically
 
 
 
 **Timesheet Tracking**
+
 Employees can review worked hours in one place
+
 Total hours automatically calculated
+
 Structured records ready for payroll preparation
 
 
 
 **Weekly Schedule Management**
+
 Admin can create and edit shifts
+
 Weekly calendar grouped by house and day
+
 Supports multiple employees across multiple locations
+
 Shifts can be added directly from weekly calendar interface
 
 
 
 **Mileage & Shift Documentation**
+
 Employees can log mileage per shift
+
 Daily shift notes stored with schedule records
+
 Improves documentation and accountability
 
 
 
 **Payroll Preparation Support**
+
 Calculates total hours worked per employee
+
 Date range filtering for payroll periods
+
 Simplifies payroll preparation workflow
 
 
 
 **PDF Export**
+
 Weekly schedules can be exported as PDF
+
 Allows easy sharing or printing of schedules
 
+---
 
+## Tech Stack
 
-**Tech Stack**
-Frontend:
+**Frontend:**
+
 Next.js (React framework)
+
 TypeScript
+
 CSS styling
 
 
 
 **Backend:**
+
 Supabase
+
 PostgreSQL database
+
 Row Level Security (RLS)
 
 
 
 **Deployment:**
+
 Vercel
 
+---
 
+## Database Structure
 
-**Database Structure**
-Main tables:
+**Main tables:**
+
 employees
+
 clock_logs
+
 schedules
+
 houses
+
 profiles
+
 employee_payroll_settings
 
 
 
 **Relationships:**
+
 employees linked to schedules and clock logs
+
 schedules linked to houses
+
 profiles linked to authentication roles
 
 
 
 **Example Workflow**
+
 Employee clocks in
+
 System stores timestamp in database
+
 Admin can view real-time activity
+
 Employee completes shift
+
 Total hours automatically calculated
+
 Admin reviews timesheets
+
 Payroll preparation simplified
 
+---
 
+## Key Learning Outcomes
 
-**Key Learning Outcomes**
 Designing relational database schema
+
 Implementing role-based authentication
+
 Building dynamic scheduling interfaces
+
 Handling real-world date and timezone formatting
+
 Calculating worked hours from timestamps
+
 Structuring business logic for payroll preparation
+
 Designing internal tools for operational workflows
 
+---
 
+## Future Improvements
 
-**Future Improvements**
 Mobile optimization
+
 Shift notifications
+
 CSV export functionality
+
 Admin analytics dashboard
+
 Enhanced reporting features
+
 Role permission customization
 
 
-**Live Demo**
+---
+
+
+## Live Demo
 https://care-clock-swart.vercel.app
 
 
-
+---
 
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
