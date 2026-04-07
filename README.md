@@ -10,9 +10,13 @@ The system centralizes scheduling, clock-ins, and timesheet records in one place
 
 This project was built to simulate a real-world internal operations tool used by teams managing multiple employees across multiple locations.
 
+
 ---
 
+
+
 ## Problem
+
 
 Many organizations rely on manual processes to manage:
 
@@ -25,6 +29,7 @@ manual hour calculations
 shift documentation
 
 mileage tracking
+
 
 
 
@@ -43,6 +48,7 @@ create inefficiencies in payroll preparation
 The goal of this project was to design a simple system that organizes these workflows digitally while keeping the process familiar and easy to adopt.
 
 ---
+
 
 ## Solution
 
@@ -89,6 +95,7 @@ Row Level Security policies applied to protect data access
 
 
 
+
 **Employee Clock In / Clock Out**
 
 Employees can clock in and out digitally
@@ -101,6 +108,7 @@ Total worked hours calculated automatically
 
 
 
+
 **Timesheet Tracking**
 
 Employees can review worked hours in one place
@@ -108,6 +116,7 @@ Employees can review worked hours in one place
 Total hours automatically calculated
 
 Structured records ready for payroll preparation
+
 
 
 
@@ -123,6 +132,7 @@ Shifts can be added directly from weekly calendar interface
 
 
 
+
 **Mileage & Shift Documentation**
 
 Employees can log mileage per shift
@@ -130,6 +140,7 @@ Employees can log mileage per shift
 Daily shift notes stored with schedule records
 
 Improves documentation and accountability
+
 
 
 
@@ -143,6 +154,7 @@ Simplifies payroll preparation workflow
 
 
 
+
 **PDF Export**
 
 Weekly schedules can be exported as PDF
@@ -150,6 +162,8 @@ Weekly schedules can be exported as PDF
 Allows easy sharing or printing of schedules
 
 ---
+
+
 
 ## Tech Stack
 
@@ -163,6 +177,7 @@ CSS styling
 
 
 
+
 **Backend:**
 
 Supabase
@@ -173,11 +188,13 @@ Row Level Security (RLS)
 
 
 
+
 **Deployment:**
 
 Vercel
 
 ---
+
 
 ## Database Structure
 
@@ -197,6 +214,8 @@ employee_payroll_settings
 
 
 
+
+
 **Relationships:**
 
 employees linked to schedules and clock logs
@@ -204,6 +223,7 @@ employees linked to schedules and clock logs
 schedules linked to houses
 
 profiles linked to authentication roles
+
 
 
 
@@ -223,7 +243,10 @@ Admin reviews timesheets
 
 Payroll preparation simplified
 
+
 ---
+
+
 
 ## Key Learning Outcomes
 
@@ -241,7 +264,10 @@ Structuring business logic for payroll preparation
 
 Designing internal tools for operational workflows
 
+
 ---
+
+
 
 ## Future Improvements
 
