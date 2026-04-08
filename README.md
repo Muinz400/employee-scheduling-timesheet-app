@@ -167,6 +167,53 @@ Allows easy sharing or printing of schedules
 
 ---
 
+## Demo Flow
+
+
+
+## Clock In
+
+![Clock In](src/images/Clock%20in.jpg)
+
+
+
+
+## Clock Out
+
+![Clock Out](src/images/Clock%20out.jpg)
+
+
+
+
+## Timesheets
+
+![Timesheets](src/images/Timesheets.jpg)
+
+
+
+
+## Admin Dashboard
+
+![Admin Dashboard](src/images/Admin%20dashboard.jpg)
+
+
+
+
+## Edit Shift
+
+![Edit Shift](src/images/Admin%20Shift%20Edit%20View.jpg)
+
+
+
+
+## Weekly Schedule
+
+![Weekly Schedule](src/images/Weekly%20scheule%20view.jpg)
+
+
+
+
+---
 
 
 ## Tech Stack
